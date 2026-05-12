@@ -39,8 +39,9 @@ class PaymentController extends Controller
         \Midtrans\Config::$isProduction = setting('midtrans_is_production') == '1';
 
         try {
+            \Illuminate\Support\Facades\Log::info('Verifying Order ID: ' . $orderId);
             $status = \Midtrans\Transaction::status($orderId);
-            \Illuminate\Support\Facades\Log::info('Midtrans Verification', (array) $status);
+            \Illuminate\Support\Facades\Log::info('Midtrans Verification Success', (array) $status);
             
             // Parse Invoice ID
             $parts = explode('-', $orderId);
@@ -57,7 +58,7 @@ class PaymentController extends Controller
                 'message' => 'Status saat ini: ' . $status->transaction_status
             ]);
         } catch (\Exception $e) {
-            \Illuminate\Support\Facades\Log::error('Midtrans Verify Error: ' . $e->getMessage());
+            \Illuminate\Support\Facades\Log::error('Midtrans Verify Error for ID ' . $orderId . ': ' . $e->getMessage());
             return response()->json(['status' => false, 'message' => $e->getMessage()]);
         }
     }
