@@ -116,7 +116,7 @@
                                         </div>
                                         <div class="d-flex justify-content-between align-items-center">
                                             <span class="small text-muted">Waktu Bayar</span>
-                                            <span class="fw-bold small">{{ $invoice->payment->paid_at->format('d M Y, H:i') }}</span>
+                                            <span class="fw-bold small">{{ $invoice->payment->paid_at ? $invoice->payment->paid_at->format('d M Y, H:i') : '-' }}</span>
                                         </div>
                                     @else
                                         <h6 class="fw-bold border-bottom pb-2 mb-3"><i class="bi bi-bank me-2"></i>Rekening Pembayaran</h6>
@@ -140,7 +140,7 @@
                                     @if($invoice->payment->proof)
                                         <div class="text-center">
                                             <img src="{{ Storage::url('proofs/' . $invoice->payment->proof) }}" class="img-fluid rounded shadow-sm border" style="max-height: 200px;">
-                                            <p class="small text-muted mt-2 mb-0">Diunggah: {{ $invoice->payment->paid_at->format('d M Y H:i') }}</p>
+                                            <p class="small text-muted mt-2 mb-0">Diunggah: {{ $invoice->payment->paid_at ? $invoice->payment->paid_at->format('d M Y H:i') : ($invoice->payment->created_at ? $invoice->payment->created_at->format('d M Y H:i') : '-') }}</p>
                                         </div>
                                     @endif
                                 @endif

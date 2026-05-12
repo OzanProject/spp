@@ -115,7 +115,7 @@ class PaymentController extends Controller
         if ($invoiceId) {
             $selectedInvoice = Invoice::where('id', $invoiceId)
                 ->where('student_id', $student->id)
-                ->where('status', '!=', 'paid')
+                ->whereIn('status', ['unpaid', 'overdue'])
                 ->first();
         }
 
@@ -156,6 +156,10 @@ class PaymentController extends Controller
         // Check if already paid or pending
         if ($invoice->status === 'paid') {
             return redirect()->back()->with('error', 'Tagihan ini sudah lunas.');
+        }
+
+        if ($invoice->status === 'pending') {
+            return redirect()->back()->with('error', 'Bukti pembayaran untuk tagihan ini sudah diupload dan sedang menunggu verifikasi admin.');
         }
 
         $filename = time() . '_proof_' . Auth::user()->id . '.' . $request->file('proof')->getClientOriginalExtension();

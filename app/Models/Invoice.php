@@ -6,10 +6,11 @@ use Illuminate\Database\Eloquent\Model;
 
 class Invoice extends Model
 {
-    protected $fillable = ['student_id', 'month', 'year', 'amount', 'due_date', 'status', 'notes'];
+    protected $fillable = ['student_id', 'month', 'year', 'amount', 'due_date', 'status', 'paid_at', 'notes'];
 
     protected $casts = [
         'due_date' => 'date',
+        'paid_at'  => 'datetime',
     ];
 
     const MONTHS = [
