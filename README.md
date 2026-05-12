@@ -75,7 +75,7 @@ Sistem Informasi Pembayaran SPP berbasis web dibangun dengan **Laravel 13**. Men
 
 > Halaman login desain modern dua kolom. Panel kiri berisi form, panel kanan menampilkan fitur unggulan sistem.
 
-<!-- ![Login](screenshots/login.png) -->
+![Login](screenshots/login.png)
 
 ![alt text](image.png)
 
@@ -83,7 +83,7 @@ Sistem Informasi Pembayaran SPP berbasis web dibangun dengan **Laravel 13**. Men
 
 > Form pendaftaran akun siswa baru. Wajib mengisi nomor WhatsApp aktif untuk notifikasi dan OTP reset password.
 
-<!-- ![Register](screenshots/register.png) -->
+![Register](screenshots/register.png)
 
 ![alt text](image-1.png)
 
@@ -91,9 +91,9 @@ Sistem Informasi Pembayaran SPP berbasis web dibangun dengan **Laravel 13**. Men
 
 > Alur reset password berbasis WhatsApp OTP 3 langkah: masukkan nomor WA > verifikasi kode OTP > buat password baru.
 
-<!-- ![Forgot Password](screenshots/forgot-password.png) -->
-<!-- ![Verify OTP](screenshots/verify-otp.png) -->
-<!-- ![Reset Password](screenshots/reset-password.png) -->
+![Forgot Password](screenshots/forgot-password.png)
+![Verify OTP](screenshots/verify-otp.png)
+![Reset Password](screenshots/reset-password.png)
 
 ![alt text](image-2.png)
 
@@ -101,7 +101,7 @@ Sistem Informasi Pembayaran SPP berbasis web dibangun dengan **Laravel 13**. Men
 
 > Panel admin dengan kartu statistik real-time, grafik tren pemasukan bulanan, dan daftar transaksi terbaru.
 
-<!-- ![Admin Dashboard](screenshots/admin-dashboard.png) -->
+![Admin Dashboard](screenshots/admin-dashboard.png)
 
 ![alt text](image-3.png)
 
@@ -109,7 +109,7 @@ Sistem Informasi Pembayaran SPP berbasis web dibangun dengan **Laravel 13**. Men
 
 > Tabel manajemen akun dengan filter role, pencarian, edit, reset password, dan hapus akun.
 
-<!-- ![User Management](screenshots/admin-users.png) -->
+![User Management](screenshots/admin-users.png)
 
 ![alt text](image-5.png)
 
@@ -117,7 +117,7 @@ Sistem Informasi Pembayaran SPP berbasis web dibangun dengan **Laravel 13**. Men
 
 > Admin dapat melihat bukti transfer yang diupload siswa dan melakukan approve atau reject.
 
-<!-- ![Payment Verification](screenshots/admin-payments.png) -->
+![Payment Verification](screenshots/admin-payments.png)
 
 ![alt text](image-6.png)
 
@@ -125,7 +125,7 @@ Sistem Informasi Pembayaran SPP berbasis web dibangun dengan **Laravel 13**. Men
 
 > Portal siswa dengan ringkasan tagihan aktif, riwayat pembayaran, dan notifikasi terbaru.
 
-<!-- ![Student Dashboard](screenshots/student-dashboard.png) -->
+![Student Dashboard](screenshots/student-dashboard.png)
 
 ![alt text](image-7.png)
 
@@ -133,7 +133,7 @@ Sistem Informasi Pembayaran SPP berbasis web dibangun dengan **Laravel 13**. Men
 
 > Wizard langkah demi langkah untuk siswa mengunggah bukti transfer pembayaran manual.
 
-<!-- ![Upload Payment](screenshots/student-upload-payment.png) -->
+![Upload Payment](screenshots/student-upload-payment.png)
 
 ![alt text](image-8.png)
 
@@ -141,7 +141,7 @@ Sistem Informasi Pembayaran SPP berbasis web dibangun dengan **Laravel 13**. Men
 
 > Laporan pemasukan per bulan dengan statistik dan tombol ekspor PDF.
 
-<!-- ![Report](screenshots/admin-reports.png) -->
+![Report](screenshots/admin-reports.png)
 
 ![alt text](image-10.png)
 

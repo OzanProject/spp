@@ -29,5 +29,4 @@ Homestead.json
 Homestead.yaml
 Thumbs.db
 /scratch
-image*.png
 /public/template_backend
