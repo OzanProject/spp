@@ -1,0 +1,72 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Support\Facades\DB;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        $settings = [
+            [
+                'key'   => 'midtrans_active',
+                'group' => 'bank',
+                'label' => 'Aktifkan Payment Gateway',
+                'value' => '0',
+            ],
+            [
+                'key'   => 'payment_gateway_provider',
+                'group' => 'bank',
+                'label' => 'Pilih Sistem Pembayaran Otomatis (Gateway)',
+                'value' => 'none',
+            ],
+            [
+                'key'   => 'midtrans_server_key',
+                'group' => 'bank',
+                'label' => 'Midtrans Server Key',
+                'value' => '',
+            ],
+            [
+                'key'   => 'midtrans_client_key',
+                'group' => 'bank',
+                'label' => 'Midtrans Client Key',
+                'value' => '',
+            ],
+            [
+                'key'   => 'midtrans_is_production',
+                'group' => 'bank',
+                'label' => 'Mode Production Midtrans',
+                'value' => '0',
+            ],
+        ];
+
+        foreach ($settings as $setting) {
+            $exists = DB::table('settings')->where('key', $setting['key'])->exists();
+            if (!$exists) {
+                DB::table('settings')->insert(array_merge($setting, [
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]));
+            }
+        }
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        $keys = [
+            'midtrans_active',
+            'payment_gateway_provider',
+            'midtrans_server_key',
+            'midtrans_client_key',
+            'midtrans_is_production',
+        ];
+
+        DB::table('settings')->whereIn('key', $keys)->delete();
+    }
+};
