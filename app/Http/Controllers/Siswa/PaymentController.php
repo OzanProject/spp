@@ -138,47 +138,60 @@ class PaymentController extends Controller
 
     public function store(Request $request)
     {
-        $request->validate([
-            'invoice_id' => 'required|exists:invoices,id',
-            'proof' => 'required|image|mimes:jpeg,png,jpg|max:2048',
-            'bank_name' => 'required|string|max:50',
-            'sender_name' => 'required|string|max:100',
-            'paid_at' => 'nullable|date',
-        ]);
+        $isAjax = $request->ajax() || $request->wantsJson() || $request->header('X-Requested-With') === 'XMLHttpRequest';
+
+        try {
+            $request->validate([
+                'invoice_id'  => 'required|exists:invoices,id',
+                'proof'       => 'required|image|mimes:jpeg,png,jpg|max:2048',
+                'bank_name'   => 'required|string|max:50',
+                'sender_name' => 'required|string|max:100',
+                'paid_at'     => 'nullable|date',
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            if ($isAjax) {
+                return response()->json(['success' => false, 'message' => implode(' ', array_merge(...array_values($e->errors())))], 422);
+            }
+            throw $e;
+        }
 
         $invoice = Invoice::findOrFail($request->invoice_id);
 
-        // Ensure own invoice
         if ($invoice->student_id != Auth::user()->student->id) {
+            if ($isAjax) return response()->json(['success' => false, 'message' => 'Akses ditolak.'], 403);
             abort(403);
         }
 
-        // Check if already paid or pending
         if ($invoice->status === 'paid') {
+            if ($isAjax) return response()->json(['success' => false, 'message' => 'Tagihan ini sudah lunas.']);
             return redirect()->back()->with('error', 'Tagihan ini sudah lunas.');
         }
 
         if ($invoice->status === 'pending') {
+            if ($isAjax) return response()->json(['success' => false, 'message' => 'Bukti pembayaran sudah diupload dan sedang menunggu verifikasi admin.']);
             return redirect()->back()->with('error', 'Bukti pembayaran untuk tagihan ini sudah diupload dan sedang menunggu verifikasi admin.');
         }
 
         $filename = time() . '_proof_' . Auth::user()->id . '.' . $request->file('proof')->getClientOriginalExtension();
-
         $request->file('proof')->storeAs('proofs', $filename, 'public');
 
         Payment::create([
-            'invoice_id' => $invoice->id,
-            'amount' => $invoice->amount,
-            'method' => 'transfer',
-            'bank_name' => $request->bank_name,
+            'invoice_id'  => $invoice->id,
+            'amount'      => $invoice->amount,
+            'method'      => 'transfer',
+            'bank_name'   => $request->bank_name,
             'sender_name' => $request->sender_name,
-            'proof' => $filename,
-            'status' => 'pending',
-            'paid_at' => $request->paid_at ?? now(),
-            'note' => $request->note,
+            'proof'       => $filename,
+            'status'      => 'pending',
+            'paid_at'     => $request->paid_at ?? now(),
+            'note'        => $request->note,
         ]);
 
         $invoice->update(['status' => 'pending']);
+
+        if ($isAjax) {
+            return response()->json(['success' => true, 'message' => 'Bukti pembayaran berhasil diupload. Mohon tunggu verifikasi admin.']);
+        }
 
         return redirect()->route('siswa.payments.create')->with('success', 'Bukti pembayaran berhasil diupload. Mohon tunggu verifikasi admin.');
     }

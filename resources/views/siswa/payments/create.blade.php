@@ -226,7 +226,7 @@
                             <h6 class="fw-bold text-dark mb-0">Langkah 3: Unggah Bukti Transfer</h6>
                         </div>
                         <div class="card-body p-4">
-                            <form action="{{ route('siswa.payments.store') }}" method="POST" enctype="multipart/form-data">
+                            <form id="manual-payment-form" action="{{ route('siswa.payments.store') }}" method="POST" enctype="multipart/form-data">
                                 @csrf
                                 <input type="hidden" name="invoice_id" id="manual_invoice_id" value="{{ $selectedInvoice->id ?? '' }}">
                                 <div class="row g-3">
@@ -261,7 +261,7 @@
                                         </div>
                                     </div>
                                     <div class="col-12 pt-3">
-                                        <button type="submit" class="btn btn-primary w-100 py-3 rounded-pill fw-bold shadow-sm">
+                                        <button type="submit" id="manual-submit-btn" class="btn btn-primary w-100 py-3 rounded-pill fw-bold shadow-sm">
                                             <i class="bi bi-send-fill me-2"></i> Konfirmasi Pembayaran Manual
                                         </button>
                                     </div>
@@ -480,5 +480,71 @@
         }
     });
     @endif
+
+    // ===================================================
+    // AJAX Submit Form Manual Upload
+    // ===================================================
+    const manualForm = document.getElementById('manual-payment-form');
+    if (manualForm) {
+        manualForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const btn = document.getElementById('manual-submit-btn');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Mengupload...';
+            btn.disabled = true;
+
+            const formData = new FormData(this);
+
+            fetch(this.action, {
+                method: 'POST',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'application/json',
+                },
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Upload Berhasil! 🎉',
+                        html: '<p class="mb-2">Bukti pembayaran Anda telah berhasil dikirim.</p><p class="text-muted small mb-0">Silakan tunggu verifikasi dari admin. Anda akan menerima notifikasi setelah pembayaran dikonfirmasi.</p>',
+                        confirmButtonText: 'Lihat Riwayat Pembayaran',
+                        confirmButtonColor: '#435ebe',
+                        showCancelButton: true,
+                        cancelButtonText: 'Upload Lagi',
+                        cancelButtonColor: '#6c757d',
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            window.location.href = '{{ route("siswa.payments.index") }}';
+                        } else {
+                            window.location.reload();
+                        }
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Gagal!',
+                        text: data.message || 'Terjadi kesalahan. Silakan coba lagi.',
+                        confirmButtonColor: '#435ebe',
+                    });
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+                }
+            })
+            .catch(error => {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Gagal Upload!',
+                    text: 'Terjadi kesalahan koneksi. Silakan coba lagi.',
+                    confirmButtonColor: '#435ebe',
+                });
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            });
+        });
+    }
 </script>
 @endsection
