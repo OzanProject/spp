@@ -143,13 +143,13 @@ class PaymentController extends Controller
             'proof' => 'required|image|mimes:jpeg,png,jpg|max:2048',
             'bank_name' => 'required|string|max:50',
             'sender_name' => 'required|string|max:100',
-            'paid_at' => 'required|date',
+            'paid_at' => 'nullable|date',
         ]);
 
         $invoice = Invoice::findOrFail($request->invoice_id);
 
         // Ensure own invoice
-        if ($invoice->student_id !== Auth::user()->student->id) {
+        if ($invoice->student_id != Auth::user()->student->id) {
             abort(403);
         }
 
@@ -170,7 +170,7 @@ class PaymentController extends Controller
             'sender_name' => $request->sender_name,
             'proof' => $filename,
             'status' => 'pending',
-            'paid_at' => $request->paid_at,
+            'paid_at' => $request->paid_at ?? now(),
             'note' => $request->note,
         ]);
 

@@ -223,6 +223,10 @@
                                         <label class="form-label small fw-bold">Nama Atas Nama Pengirim</label>
                                         <input type="text" name="sender_name" class="form-control rounded-pill px-3" placeholder="Sesuai nama di struk/M-Banking" required>
                                     </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label small fw-bold">Tanggal Transfer</label>
+                                        <input type="date" name="paid_at" class="form-control rounded-pill px-3" value="{{ date('Y-m-d') }}" required>
+                                    </div>
                                     <div class="col-12">
                                         <label class="form-label small fw-bold">Unggah Bukti (Foto/Screenshot)</label>
                                         <div class="file-upload-zone" onclick="document.getElementById('proof-input').click()">
