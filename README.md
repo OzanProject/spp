@@ -77,7 +77,7 @@ Sistem Informasi Pembayaran SPP berbasis web dibangun dengan **Laravel 13**. Men
 
 <!-- ![Login](screenshots/login.png) -->
 
----
+![alt text](image.png)
 
 ### Halaman Registrasi
 
@@ -85,7 +85,7 @@ Sistem Informasi Pembayaran SPP berbasis web dibangun dengan **Laravel 13**. Men
 
 <!-- ![Register](screenshots/register.png) -->
 
----
+![alt text](image-1.png)
 
 ### Halaman Lupa Password
 
@@ -95,7 +95,7 @@ Sistem Informasi Pembayaran SPP berbasis web dibangun dengan **Laravel 13**. Men
 <!-- ![Verify OTP](screenshots/verify-otp.png) -->
 <!-- ![Reset Password](screenshots/reset-password.png) -->
 
----
+![alt text](image-2.png)
 
 ### Dashboard Admin
 
@@ -103,7 +103,7 @@ Sistem Informasi Pembayaran SPP berbasis web dibangun dengan **Laravel 13**. Men
 
 <!-- ![Admin Dashboard](screenshots/admin-dashboard.png) -->
 
----
+![alt text](image-3.png)
 
 ### Manajemen Pengguna
 
@@ -111,7 +111,7 @@ Sistem Informasi Pembayaran SPP berbasis web dibangun dengan **Laravel 13**. Men
 
 <!-- ![User Management](screenshots/admin-users.png) -->
 
----
+![alt text](image-5.png)
 
 ### Verifikasi Pembayaran
 
@@ -119,7 +119,7 @@ Sistem Informasi Pembayaran SPP berbasis web dibangun dengan **Laravel 13**. Men
 
 <!-- ![Payment Verification](screenshots/admin-payments.png) -->
 
----
+![alt text](image-6.png)
 
 ### Dashboard Siswa
 
@@ -127,7 +127,7 @@ Sistem Informasi Pembayaran SPP berbasis web dibangun dengan **Laravel 13**. Men
 
 <!-- ![Student Dashboard](screenshots/student-dashboard.png) -->
 
----
+![alt text](image-7.png)
 
 ### Upload Bukti Pembayaran
 
@@ -135,7 +135,7 @@ Sistem Informasi Pembayaran SPP berbasis web dibangun dengan **Laravel 13**. Men
 
 <!-- ![Upload Payment](screenshots/student-upload-payment.png) -->
 
----
+![alt text](image-8.png)
 
 ### Laporan Keuangan
 
@@ -143,7 +143,7 @@ Sistem Informasi Pembayaran SPP berbasis web dibangun dengan **Laravel 13**. Men
 
 <!-- ![Report](screenshots/admin-reports.png) -->
 
----
+![alt text](image-10.png)
 
 ## Entity Relationship Diagram (ERD)
 
