@@ -33,8 +33,8 @@ class PaymentController extends Controller
         $stats = [
             'pending'  => Invoice::where('status', 'pending')->count(),
             'overdue'  => Invoice::where('status', 'overdue')->count(),
-            'paid_today' => Payment::where('status', 'success')->whereDate('paid_at', today())->count(),
-            'total_today' => Payment::where('payments.status', 'success')->whereDate('paid_at', today())
+            'paid_today' => Payment::where('status', 'success')->whereDate('payments.paid_at', today())->count(),
+            'total_today' => Payment::where('payments.status', 'success')->whereDate('payments.paid_at', today())
                 ->join('invoices', 'invoices.id', '=', 'payments.invoice_id')
                 ->sum('invoices.amount'),
         ];
