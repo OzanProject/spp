@@ -41,27 +41,31 @@ class PaymentController extends Controller
         \Midtrans\Config::$serverKey = setting('midtrans_server_key');
         \Midtrans\Config::$isProduction = setting('midtrans_is_production') == '1';
 
+        // Parse Invoice ID dari Order ID (Format: INV-{id}-{time})
+        $parts = explode('-', $orderId);
+        $invoiceId = $parts[1] ?? null;
+        $invoice = Invoice::find($invoiceId);
+
+        if (!$invoice) {
+            \Illuminate\Support\Facades\Log::warning('Verify: Invoice not found for ' . $orderId);
+            return response()->json(['status' => false, 'message' => 'Invoice tidak ditemukan']);
+        }
+
+        // Jika sudah lunas, langsung kembalikan sukses
+        if ($invoice->status === 'paid') {
+            return response()->json(['status' => true, 'message' => 'Sudah lunas']);
+        }
+
+        // METODE 1: Coba verifikasi langsung ke API Midtrans
         try {
-            \Illuminate\Support\Facades\Log::info('Verifying Order ID: ' . $orderId);
-
+            \Illuminate\Support\Facades\Log::info('Verifying Order ID via API: ' . $orderId);
             $status = \Midtrans\Transaction::status($orderId);
+            \Illuminate\Support\Facades\Log::info('Midtrans API Response', (array) $status);
 
-            // Log as array for Laravel Log
-            \Illuminate\Support\Facades\Log::info('Midtrans Verification Success', (array) $status);
+            $transactionStatus = $status->transaction_status ?? null;
 
-            // Parse Invoice ID
-            $parts = explode('-', $orderId);
-            $invoiceId = $parts[1] ?? null;
-            $invoice = Invoice::find($invoiceId);
-
-            // Aman untuk object maupun array
-            $transactionStatus = is_array($status)
-                ? ($status['transaction_status'] ?? null)
-                : ($status->transaction_status ?? null);
-
-            if ($invoice && ($transactionStatus == 'settlement' || $transactionStatus == 'capture')) {
-                $this->markAsPaid($invoice, is_array($status) ? (object) $status : $status);
-
+            if ($transactionStatus == 'settlement' || $transactionStatus == 'capture') {
+                $this->markAsPaid($invoice, $status);
                 return response()->json(['status' => true]);
             }
 
@@ -71,11 +75,28 @@ class PaymentController extends Controller
             ]);
 
         } catch (\Exception $e) {
-            \Illuminate\Support\Facades\Log::warning('Midtrans Verify Warning for ID ' . $orderId . ': ' . $e->getMessage());
+            \Illuminate\Support\Facades\Log::warning('Midtrans API failed: ' . $e->getMessage());
+
+            // METODE 2 (FALLBACK): Gunakan data dari Snap JS callback
+            $callbackStatus = $request->transaction_status;
+
+            if ($callbackStatus == 'settlement' || $callbackStatus == 'capture') {
+                \Illuminate\Support\Facades\Log::info('Using Snap callback fallback for ' . $orderId);
+
+                $this->markAsPaid($invoice, (object) [
+                    'transaction_id'     => $request->transaction_id ?? $orderId,
+                    'payment_type'       => $request->payment_type ?? 'gateway',
+                    'transaction_status' => $callbackStatus,
+                    'fraud_status'       => $request->fraud_status ?? 'accept',
+                    'order_id'           => $orderId,
+                ]);
+
+                return response()->json(['status' => true]);
+            }
 
             return response()->json([
                 'status' => false,
-                'message' => 'Transaksi belum ditemukan atau belum diproses Midtrans.'
+                'message' => 'Transaksi belum dapat diverifikasi. Status akan diperbarui otomatis.'
             ]);
         }
     }

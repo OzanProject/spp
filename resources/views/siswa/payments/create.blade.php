@@ -413,13 +413,23 @@
             if (data.status) {
                 window.snap.pay(data.token, {
                     onSuccess: function(result) {
-                        fetch('{{ route("siswa.payments.verify") }}', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
-                            body: JSON.stringify({ order_id: result.order_id })
-                        }).finally(() => {
-                            window.location.href = '{{ route("siswa.payments.index") }}?success=1';
-                        });
+                        console.log('Payment Success:', result);
+                        // Beri waktu 3 detik agar Midtrans sempat memproses transaksi
+                        setTimeout(function() {
+                            fetch('{{ route("siswa.payments.verify") }}', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
+                                body: JSON.stringify({
+                                    order_id: result.order_id,
+                                    transaction_status: result.transaction_status,
+                                    payment_type: result.payment_type,
+                                    transaction_id: result.transaction_id,
+                                    fraud_status: result.fraud_status
+                                })
+                            }).finally(() => {
+                                window.location.href = '{{ route("siswa.payments.index") }}?success=1';
+                            });
+                        }, 3000);
                     },
                     onPending: function(result) {
                         window.location.href = '{{ route("siswa.payments.index") }}?pending=1';
