@@ -10,6 +10,9 @@ return new class extends Migration
      */
     public function up(): void
     {
+        // Cleanup unwanted keys
+        DB::table('settings')->where('key', 'midtrans_merchant_id')->delete();
+
         $settings = [
             [
                 'key'   => 'midtrans_active',
@@ -20,7 +23,7 @@ return new class extends Migration
             [
                 'key'   => 'payment_gateway_provider',
                 'group' => 'bank',
-                'label' => 'Pilih Sistem Pembayaran Otomatis (Gateway)',
+                'label' => 'Pilih Provider Payment Gateway',
                 'value' => 'none',
             ],
             [
@@ -44,13 +47,12 @@ return new class extends Migration
         ];
 
         foreach ($settings as $setting) {
-            $exists = DB::table('settings')->where('key', $setting['key'])->exists();
-            if (!$exists) {
-                DB::table('settings')->insert(array_merge($setting, [
-                    'created_at' => now(),
+            DB::table('settings')->updateOrInsert(
+                ['key' => $setting['key']],
+                array_merge($setting, [
                     'updated_at' => now(),
-                ]));
-            }
+                ])
+            );
         }
     }
 
