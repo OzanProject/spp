@@ -10,9 +10,6 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // Cleanup unwanted keys
-        DB::table('settings')->where('key', 'midtrans_merchant_id')->delete();
-
         $settings = [
             [
                 'key'   => 'bank_name',
@@ -43,6 +40,12 @@ return new class extends Migration
                 'group' => 'bank',
                 'label' => 'Pilih Provider Payment Gateway',
                 'value' => 'none',
+            ],
+            [
+                'key'   => 'midtrans_merchant_id',
+                'group' => 'bank',
+                'label' => 'Midtrans Merchant ID',
+                'value' => '',
             ],
             [
                 'key'   => 'midtrans_server_key',
