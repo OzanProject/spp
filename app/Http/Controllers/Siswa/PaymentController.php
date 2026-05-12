@@ -245,21 +245,31 @@ class PaymentController extends Controller
             'status'      => 'success',
             'bank_name'   => $notif->payment_type ?? 'Gateway',
             'sender_name' => 'Automatic Payment',
-            'note'        => 'Paid via Midtrans Gateway. ID: ' . $notif->transaction_id,
+            'note'        => 'Paid via Midtrans Gateway. ID: ' . ($notif->transaction_id ?? '-'),
         ]);
 
-        // Send Notification
-        $invoice->student->user->notify(new \App\Notifications\PaymentSuccessful($invoice, $payment));
+        // Send Notification (Hanya jika data siswa lengkap)
+        if ($invoice && $invoice->student && $invoice->student->user) {
+            try {
+                $invoice->student->user->notify(new \App\Notifications\PaymentSuccessful($invoice, $payment));
+            } catch (\Exception $e) {
+                \Illuminate\Support\Facades\Log::error('Notification Error: ' . $e->getMessage());
+            }
 
-        // Send WhatsApp Notification
-        if ($invoice->student->parent_phone) {
-            $msg = "*PEMBAYARAN BERHASIL*\n\n";
-            $msg .= "Halo " . $invoice->student->user->name . ",\n";
-            $msg .= "Pembayaran SPP Anda untuk periode *" . $invoice->month_name . " " . $invoice->year . "* sebesar *" . currency($invoice->amount) . "* telah kami terima dan diverifikasi.\n\n";
-            $msg .= "Terima kasih telah melakukan pembayaran tepat waktu.\n";
-            $msg .= "_" . setting('school_name') . "_";
-            
-            \App\Services\WhatsappService::send($invoice->student->parent_phone, $msg);
+            // Send WhatsApp Notification
+            if ($invoice->student->parent_phone) {
+                try {
+                    $msg = "*PEMBAYARAN BERHASIL*\n\n";
+                    $msg .= "Halo " . $invoice->student->user->name . ",\n";
+                    $msg .= "Pembayaran SPP Anda untuk periode *" . $invoice->month_name . " " . $invoice->year . "* sebesar *" . currency($invoice->amount) . "* telah kami terima dan diverifikasi.\n\n";
+                    $msg .= "Terima kasih telah melakukan pembayaran tepat waktu.\n";
+                    $msg .= "_" . setting('school_name') . "_";
+                    
+                    \App\Services\WhatsappService::send($invoice->student->parent_phone, $msg);
+                } catch (\Exception $e) {
+                    \Illuminate\Support\Facades\Log::error('WA Notification Error: ' . $e->getMessage());
+                }
+            }
         }
     }
 }
