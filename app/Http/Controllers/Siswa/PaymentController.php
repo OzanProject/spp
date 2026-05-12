@@ -192,6 +192,11 @@ class PaymentController extends Controller
         \Midtrans\Config::$isProduction = setting('midtrans_is_production') == '1';
 
         try {
+            // Handle Test Notification from Midtrans Dashboard
+            if (str_contains($request->order_id, 'payment_notif_test')) {
+                return response()->json(['message' => 'Test notification received successfully'], 200);
+            }
+
             $notif = new \Midtrans\Notification();
             
             $transaction = $notif->transaction_status;
@@ -201,29 +206,30 @@ class PaymentController extends Controller
 
             // Parse Invoice ID from Order ID (Format: INV-{id}-{time})
             $parts = explode('-', $order_id);
-            $invoiceId = $parts[1] ?? null;
-
-            if (!$invoiceId) return response()->json(['message' => 'Invalid Order ID'], 400);
-
+            if (count($parts) < 2 || $parts[0] !== 'INV') {
+                 return response()->json(['message' => 'Invalid Format'], 200); // Tetap 200 agar Midtrans tidak kirim email error
+            }
+            
+            $invoiceId = $parts[1];
             $invoice = Invoice::find($invoiceId);
-            if (!$invoice) return response()->json(['message' => 'Invoice not found'], 404);
 
-            if ($transaction == 'capture') {
-                if ($type == 'credit_card') {
-                    if ($fraud == 'challenge') {
-                        // Handle challenge
-                    } else {
-                        $this->markAsPaid($invoice, $notif);
-                    }
+            if (!$invoice) {
+                return response()->json(['message' => 'Invoice not found'], 200); // Tetap 200
+            }
+
+            if ($transaction == 'settlement' || $transaction == 'capture') {
+                if ($transaction == 'capture' && $type == 'credit_card' && $fraud == 'challenge') {
+                    // Challenge
+                } else {
+                    $this->markAsPaid($invoice, $notif);
                 }
-            } else if ($transaction == 'settlement') {
-                $this->markAsPaid($invoice, $notif);
             }
 
             return response()->json(['status' => 'success']);
         } catch (\Exception $e) {
             \Illuminate\Support\Facades\Log::error('Midtrans Webhook Error: ' . $e->getMessage());
-            return response()->json(['message' => $e->getMessage()], 500);
+            // Berikan 200 OK meskipun error, agar Midtrans berhenti mencoba ulang jika masalahnya di logika kita
+            return response()->json(['message' => 'Processed with error: ' . $e->getMessage()], 200);
         }
     }
 
