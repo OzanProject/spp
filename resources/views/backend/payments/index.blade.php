@@ -237,6 +237,7 @@
                                         <img src="{{ Storage::url('proofs/' . $invoice->payment->proof) }}" class="img-fluid rounded shadow-sm border border-4 border-white mb-3" style="max-height: 300px; object-fit: contain;">
                                     @endif
 
+                                    @if($invoice->payment)
                                     <div class="text-start bg-white p-3 rounded shadow-sm">
                                         <div class="row g-3">
                                             <div class="col-6">
@@ -255,7 +256,7 @@
                                                 <small class="text-muted d-block">Waktu</small>
                                                 <span class="fw-bold small">{{ $invoice->payment->paid_at ? $invoice->payment->paid_at->format('d/m/Y H:i') : '-' }}</span>
                                             </div>
-                                            @if($invoice->payment && $invoice->payment->note)
+                                            @if($invoice->payment->note)
                                             <div class="col-12 border-top pt-2 mt-2">
                                                 <small class="text-muted d-block">Catatan/Log:</small>
                                                 <div class="p-2 bg-light rounded small font-monospace" style="font-size: 11px;">{{ $invoice->payment->note }}</div>
@@ -263,6 +264,11 @@
                                             @endif
                                         </div>
                                     </div>
+                                    @else
+                                    <div class="alert alert-light-warning small border-0 py-2">
+                                        <i class="bi bi-exclamation-triangle me-1"></i> Data pembayaran belum tersedia untuk tagihan ini.
+                                    </div>
+                                    @endif
                                 </div>
                                 <div class="modal-footer bg-light p-2">
                                     <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Tutup</button>
