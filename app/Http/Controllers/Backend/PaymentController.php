@@ -52,9 +52,13 @@ class PaymentController extends Controller
         $payment = Payment::updateOrCreate(
             ['invoice_id' => $invoice->id],
             [
-                'paid_at' => now(), 
-                'status' => 'success',
-                'note' => ($invoice->payment->note ?? '') . " | Dikonfirmasi oleh admin"
+                'amount'      => $invoice->amount,
+                'method'      => 'transfer',
+                'bank_name'   => 'Manual',
+                'sender_name' => 'Dikonfirmasi Admin',
+                'paid_at'     => now(), 
+                'status'      => 'success',
+                'note'        => ($invoice->payment->note ?? '') . " | Dikonfirmasi oleh admin"
             ]
         );
 
