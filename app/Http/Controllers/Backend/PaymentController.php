@@ -44,7 +44,10 @@ class PaymentController extends Controller
 
     public function confirm(Invoice $invoice)
     {
-        $invoice->update(['status' => 'paid']);
+        $invoice->update([
+            'status' => 'paid',
+            'paid_at' => now(),
+        ]);
 
         $payment = Payment::updateOrCreate(
             ['invoice_id' => $invoice->id],
@@ -55,19 +58,29 @@ class PaymentController extends Controller
             ]
         );
 
-        // Send Notification
-        $invoice->student->user->notify(new \App\Notifications\PaymentSuccessful($invoice, $payment));
+        // Send Notification (hanya jika data siswa lengkap)
+        if ($invoice->student && $invoice->student->user) {
+            try {
+                $invoice->student->user->notify(new \App\Notifications\PaymentSuccessful($invoice, $payment));
+            } catch (\Exception $e) {
+                \Illuminate\Support\Facades\Log::error('Confirm Notification Error: ' . $e->getMessage());
+            }
 
-        // Send WhatsApp Notification
-        if ($invoice->student->parent_phone) {
-            $msg = "*PEMBAYARAN BERHASIL*\n\n";
-            $msg .= "Halo " . $invoice->student->user->name . ",\n";
-            $msg .= "Pembayaran SPP *" . $invoice->month_name . " " . $invoice->year . "* sebesar *" . currency($invoice->amount) . "* telah DIKONFIRMASI oleh Admin.\n\n";
-            $msg .= "Status: LUNAS\n";
-            $msg .= "Terima kasih.\n";
-            $msg .= "_" . setting('school_name') . "_";
-            
-            \App\Services\WhatsappService::send($invoice->student->parent_phone, $msg);
+            // Send WhatsApp Notification
+            if ($invoice->student->parent_phone) {
+                try {
+                    $msg = "*PEMBAYARAN BERHASIL*\n\n";
+                    $msg .= "Halo " . $invoice->student->user->name . ",\n";
+                    $msg .= "Pembayaran SPP *" . $invoice->month_name . " " . $invoice->year . "* sebesar *" . currency($invoice->amount) . "* telah DIKONFIRMASI oleh Admin.\n\n";
+                    $msg .= "Status: LUNAS\n";
+                    $msg .= "Terima kasih.\n";
+                    $msg .= "_" . setting('school_name') . "_";
+                    
+                    \App\Services\WhatsappService::send($invoice->student->parent_phone, $msg);
+                } catch (\Exception $e) {
+                    \Illuminate\Support\Facades\Log::error('Confirm WA Error: ' . $e->getMessage());
+                }
+            }
         }
 
         return back()->with('success', 'Pembayaran berhasil dikonfirmasi.');
@@ -83,19 +96,29 @@ class PaymentController extends Controller
                 'reject_reason' => $request->reason
             ]);
 
-            // Send Notification
-            $invoice->student->user->notify(new \App\Notifications\PaymentRejected($invoice, $invoice->payment, $request->reason));
+            // Send Notification (hanya jika data siswa lengkap)
+            if ($invoice->student && $invoice->student->user) {
+                try {
+                    $invoice->student->user->notify(new \App\Notifications\PaymentRejected($invoice, $invoice->payment, $request->reason));
+                } catch (\Exception $e) {
+                    \Illuminate\Support\Facades\Log::error('Reject Notification Error: ' . $e->getMessage());
+                }
 
-            // Send WhatsApp Notification
-            if ($invoice->student->parent_phone) {
-                $msg = "*PEMBAYARAN DITOLAK*\n\n";
-                $msg .= "Halo " . $invoice->student->user->name . ",\n";
-                $msg .= "Mohon maaf, pembayaran SPP *" . $invoice->month_name . " " . $invoice->year . "* Anda DITOLAK oleh Admin.\n\n";
-                $msg .= "*Alasan:* " . $request->reason . "\n\n";
-                $msg .= "Silakan hubungi bagian keuangan atau upload ulang bukti pembayaran yang benar.\n";
-                $msg .= "_" . setting('school_name') . "_";
-                
-                \App\Services\WhatsappService::send($invoice->student->parent_phone, $msg);
+                // Send WhatsApp Notification
+                if ($invoice->student->parent_phone) {
+                    try {
+                        $msg = "*PEMBAYARAN DITOLAK*\n\n";
+                        $msg .= "Halo " . $invoice->student->user->name . ",\n";
+                        $msg .= "Mohon maaf, pembayaran SPP *" . $invoice->month_name . " " . $invoice->year . "* Anda DITOLAK oleh Admin.\n\n";
+                        $msg .= "*Alasan:* " . $request->reason . "\n\n";
+                        $msg .= "Silakan hubungi bagian keuangan atau upload ulang bukti pembayaran yang benar.\n";
+                        $msg .= "_" . setting('school_name') . "_";
+                        
+                        \App\Services\WhatsappService::send($invoice->student->parent_phone, $msg);
+                    } catch (\Exception $e) {
+                        \Illuminate\Support\Facades\Log::error('Reject WA Error: ' . $e->getMessage());
+                    }
+                }
             }
         }
 
