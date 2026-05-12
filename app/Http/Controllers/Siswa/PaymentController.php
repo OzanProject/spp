@@ -137,8 +137,12 @@ class PaymentController extends Controller
     {
         $invoice = Invoice::findOrFail($request->invoice_id);
         
-        if ($invoice->student_id !== Auth::user()->student->id) {
-            return response()->json(['status' => false, 'message' => 'Akses ditolak.']);
+        // Gunakan perbandingan longgar (!=) untuk menghindari masalah tipe data string vs int
+        if ($invoice->student_id != Auth::user()->student->id) {
+            return response()->json([
+                'status' => false, 
+                'message' => 'Akses ditolak. Tagihan ini bukan milik Anda (User ID: ' . Auth::user()->id . ', Student ID: ' . Auth::user()->student->id . ', Invoice Student ID: ' . $invoice->student_id . ')'
+            ]);
         }
 
         // Configure Midtrans
