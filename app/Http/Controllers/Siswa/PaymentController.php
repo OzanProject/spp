@@ -176,7 +176,7 @@ class PaymentController extends Controller
 
         $invoice->update(['status' => 'pending']);
 
-        return redirect()->route('siswa.payments.index')->with('success', 'Bukti pembayaran berhasil diupload. Mohon tunggu verifikasi admin.');
+        return redirect()->route('siswa.payments.create')->with('success', 'Bukti pembayaran berhasil diupload. Mohon tunggu verifikasi admin.');
     }
 
     public function getSnapToken(Request $request)

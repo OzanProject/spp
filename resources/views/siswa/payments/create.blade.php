@@ -123,6 +123,21 @@
             </div>
         @endif
 
+        @if(session('success'))
+            <div class="alert alert-success alert-dismissible fade show border-0 shadow-sm">
+                <div class="d-flex align-items-center">
+                    <div class="bg-success text-white rounded-circle p-2 me-3 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                        <i class="bi bi-check-lg fs-5"></i>
+                    </div>
+                    <div>
+                        <h6 class="alert-heading mb-0 fw-bold">Upload Berhasil!</h6>
+                        <p class="mb-0 small">{{ session('success') }}</p>
+                    </div>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        @endif
+
         @if($invoices->isEmpty())
             <div class="card shadow-sm border-0 rounded-4">
                 <div class="card-body text-center py-5">
@@ -446,6 +461,23 @@
                 location.reload();
             }
         });
+    });
+    @endif
+
+    @if(session('success'))
+    Swal.fire({
+        icon: 'success',
+        title: 'Upload Berhasil! 🎉',
+        html: '<p class="mb-2">Bukti pembayaran Anda telah berhasil dikirim.</p><p class="text-muted small">Silakan tunggu verifikasi dari admin. Anda akan menerima notifikasi setelah pembayaran dikonfirmasi.</p>',
+        confirmButtonText: 'Lihat Riwayat Pembayaran',
+        confirmButtonColor: '#435ebe',
+        showCancelButton: true,
+        cancelButtonText: 'Tetap di Halaman Ini',
+        cancelButtonColor: '#6c757d',
+    }).then((result) => {
+        if (result.isConfirmed) {
+            window.location.href = '{{ route("siswa.payments.index") }}';
+        }
     });
     @endif
 </script>
