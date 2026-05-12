@@ -15,6 +15,24 @@ return new class extends Migration
 
         $settings = [
             [
+                'key'   => 'bank_name',
+                'group' => 'bank',
+                'label' => 'Nama Bank',
+                'value' => '',
+            ],
+            [
+                'key'   => 'bank_account',
+                'group' => 'bank',
+                'label' => 'Nomor Rekening',
+                'value' => '',
+            ],
+            [
+                'key'   => 'bank_holder',
+                'group' => 'bank',
+                'label' => 'Atas Nama',
+                'value' => '',
+            ],
+            [
                 'key'   => 'midtrans_active',
                 'group' => 'bank',
                 'label' => 'Aktifkan Payment Gateway',

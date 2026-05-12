@@ -94,6 +94,20 @@
                                         $groupSettings = $settings[$groupKey] ?? collect();
                                     @endphp
                                     @forelse($groupSettings as $setting)
+                                    @if($setting->key === 'bank_name')
+                                        <div class="mb-3">
+                                            <div class="d-flex align-items-center gap-2 mb-3">
+                                                <div class="bg-light-primary p-2 rounded text-primary">
+                                                    <i class="bi bi-bank fs-5"></i>
+                                                </div>
+                                                <div>
+                                                    <h6 class="mb-0 fw-bold">Rekening Bank Manual</h6>
+                                                    <small class="text-muted">Informasi rekening untuk pembayaran via transfer manual (Siswa upload bukti).</small>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    @endif
+
                                     @if($setting->key === 'payment_gateway_provider')
                                         <div class="mt-4 mb-3 pt-4 border-top">
                                             <div class="d-flex align-items-center gap-2 mb-3">
