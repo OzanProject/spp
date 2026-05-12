@@ -36,9 +36,14 @@ class Setting extends Model
         ['key' => 'late_fee_amount','group' => 'finance',  'label' => 'Nominal Denda (Rp)',  'value' => '5000'],
         ['key' => 'invoice_prefix', 'group' => 'finance',  'label' => 'Prefix Nomor Invoice','value' => 'INV'],
         // Group: bank
-        ['key' => 'bank_name',      'group' => 'bank',     'label' => 'Nama Bank',           'value' => ''],
-        ['key' => 'bank_account',   'group' => 'bank',     'label' => 'Nomor Rekening',      'value' => ''],
-        ['key' => 'bank_holder',    'group' => 'bank',     'label' => 'Atas Nama',           'value' => ''],
+        ['key' => 'bank_name',                 'group' => 'bank',     'label' => 'Nama Bank',                          'value' => ''],
+        ['key' => 'bank_account',              'group' => 'bank',     'label' => 'Nomor Rekening',                     'value' => ''],
+        ['key' => 'bank_holder',               'group' => 'bank',     'label' => 'Atas Nama',                          'value' => ''],
+        ['key' => 'midtrans_active',           'group' => 'bank',     'label' => 'Aktifkan Payment Gateway',           'value' => '0'],
+        ['key' => 'payment_gateway_provider',  'group' => 'bank',     'label' => 'Pilih Sistem Pembayaran Otomatis (Gateway)', 'value' => 'none'],
+        ['key' => 'midtrans_server_key',       'group' => 'bank',     'label' => 'Midtrans Server Key',                'value' => ''],
+        ['key' => 'midtrans_client_key',       'group' => 'bank',     'label' => 'Midtrans Client Key',                'value' => ''],
+        ['key' => 'midtrans_is_production',    'group' => 'bank',     'label' => 'Mode Production Midtrans',           'value' => '0'],
         // Group: notification
         ['key' => 'wa_token',       'group' => 'notification','label' => 'Token WhatsApp (Fonnte)','value' => ''],
         ['key' => 'wa_sender',      'group' => 'notification','label' => 'Nomor Pengirim WA', 'value' => ''],
