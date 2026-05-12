@@ -57,8 +57,8 @@
                                     </div>
                                 </td>
                                 <td>
-                                    <div class="fw-bold small">{{ $payment->created_at->translatedFormat('d M Y') }}</div>
-                                    <div class="text-muted small">{{ $payment->created_at->format('H:i') }} WIB</div>
+                                    <div class="fw-bold small">{{ $payment->created_at?->translatedFormat('d M Y') ?? '-' }}</div>
+                                    <div class="text-muted small">{{ $payment->created_at?->format('H:i') ?? '-' }} WIB</div>
                                 </td>
                                 <td>
                                     <h6 class="mb-0 fw-bold text-dark">{{ currency($payment->amount) }}</h6>
@@ -127,7 +127,7 @@
                                                             </div>
                                                             <div class="col-6 text-end">
                                                                 <small class="text-muted d-block">Waktu Transaksi</small>
-                                                                <span class="fw-bold small">{{ $payment->paid_at->translatedFormat('d M Y, H:i') }}</span>
+                                                                <span class="fw-bold small">{{ $payment->paid_at ? $payment->paid_at->translatedFormat('d M Y, H:i') : ($payment->created_at?->translatedFormat('d M Y, H:i') ?? '-') }}</span>
                                                             </div>
                                                             <div class="col-6">
                                                                 <small class="text-muted d-block">Provider/Bank</small>
