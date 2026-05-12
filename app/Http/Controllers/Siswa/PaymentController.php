@@ -41,6 +41,8 @@ class PaymentController extends Controller
         try {
             \Illuminate\Support\Facades\Log::info('Verifying Order ID: ' . $orderId);
             $status = \Midtrans\Transaction::status($orderId);
+            
+            // Log as array for Laravel Log
             \Illuminate\Support\Facades\Log::info('Midtrans Verification Success', (array) $status);
             
             // Parse Invoice ID
@@ -48,14 +50,16 @@ class PaymentController extends Controller
             $invoiceId = $parts[1] ?? null;
             $invoice = Invoice::find($invoiceId);
 
-            if ($invoice && ($status->transaction_status == 'settlement' || $status->transaction_status == 'capture')) {
+            $transactionStatus = $status->transaction_status ?? null;
+
+            if ($invoice && ($transactionStatus == 'settlement' || $transactionStatus == 'capture')) {
                 $this->markAsPaid($invoice, $status);
                 return response()->json(['status' => true]);
             }
 
             return response()->json([
                 'status' => false, 
-                'message' => 'Status saat ini: ' . $status->transaction_status
+                'message' => 'Status saat ini: ' . ($transactionStatus ?? 'Unknown')
             ]);
         } catch (\Exception $e) {
             \Illuminate\Support\Facades\Log::error('Midtrans Verify Error for ID ' . $orderId . ': ' . $e->getMessage());
@@ -66,7 +70,7 @@ class PaymentController extends Controller
     public function create(Request $request)
     {
         $student = Auth::user()->student;
-        $invoiceId = $request->get('invoice_id');
+        $invoiceId = $request->input('invoice_id');
         
         $invoices = Invoice::where('student_id', $student->id)
             ->whereIn('status', ['unpaid', 'overdue'])
@@ -186,50 +190,64 @@ class PaymentController extends Controller
     }
     public function handleNotification(Request $request)
     {
-        \Illuminate\Support\Facades\Log::info('Midtrans Webhook Received', $request->all());
+        $payload = $request->all();
+        \Illuminate\Support\Facades\Log::info('Midtrans Webhook Received', $payload);
         
         \Midtrans\Config::$serverKey = setting('midtrans_server_key');
         \Midtrans\Config::$isProduction = setting('midtrans_is_production') == '1';
 
         try {
-            // Handle Test Notification from Midtrans Dashboard
-            if (str_contains($request->order_id, 'payment_notif_test')) {
-                return response()->json(['message' => 'Test notification received successfully'], 200);
+            // 1. Filter: Pastikan ini adalah notifikasi pembayaran
+            if (!isset($payload['order_id']) || !isset($payload['transaction_status'])) {
+                \Illuminate\Support\Facades\Log::warning('Midtrans Webhook Ignored: Missing required fields');
+                return response()->json(['message' => 'Ignored'], 200);
             }
 
-            $notif = new \Midtrans\Notification();
-            
-            $transaction = $notif->transaction_status;
-            $type = $notif->payment_type;
-            $order_id = $notif->order_id;
-            $fraud = $notif->fraud_status;
+            // 2. Handle Test Notification dari Dashboard
+            if (str_contains($payload['order_id'], 'payment_notif_test')) {
+                return response()->json(['message' => 'Test OK'], 200);
+            }
 
-            // Parse Invoice ID from Order ID (Format: INV-{id}-{time})
-            $parts = explode('-', $order_id);
+            // 3. Ambil data dengan aman
+            $orderId = $payload['order_id'];
+            $transactionStatus = $payload['transaction_status'];
+            $type = $payload['payment_type'] ?? null;
+            $fraud = $payload['fraud_status'] ?? null;
+
+            // Parse Invoice ID (Format: INV-{id}-{time})
+            $parts = explode('-', $orderId);
             if (count($parts) < 2 || $parts[0] !== 'INV') {
-                 return response()->json(['message' => 'Invalid Format'], 200); // Tetap 200 agar Midtrans tidak kirim email error
+                 return response()->json(['message' => 'Invalid Format'], 200);
             }
             
             $invoiceId = $parts[1];
             $invoice = Invoice::find($invoiceId);
 
             if (!$invoice) {
-                return response()->json(['message' => 'Invoice not found'], 200); // Tetap 200
+                \Illuminate\Support\Facades\Log::warning('Invoice not found for Order ID: ' . $orderId);
+                return response()->json(['message' => 'Not Found'], 200);
             }
 
-            if ($transaction == 'settlement' || $transaction == 'capture') {
-                if ($transaction == 'capture' && $type == 'credit_card' && $fraud == 'challenge') {
-                    // Challenge
+            // 4. Update status berdasarkan respon Midtrans
+            if ($transactionStatus == 'settlement' || $transactionStatus == 'capture') {
+                if ($transactionStatus == 'capture' && $type == 'credit_card' && $fraud == 'challenge') {
+                    // Masih dalam tantangan/challenge
                 } else {
-                    $this->markAsPaid($invoice, $notif);
+                    // LUNAS
+                    $this->markAsPaid($invoice, (object) $payload);
+                }
+            } elseif (in_array($transactionStatus, ['deny', 'expire', 'cancel'])) {
+                // GAGAL
+                $invoice->update(['status' => 'unpaid']);
+                if ($invoice->payment) {
+                    $invoice->payment->update(['status' => 'failed']);
                 }
             }
 
             return response()->json(['status' => 'success']);
         } catch (\Exception $e) {
             \Illuminate\Support\Facades\Log::error('Midtrans Webhook Error: ' . $e->getMessage());
-            // Berikan 200 OK meskipun error, agar Midtrans berhenti mencoba ulang jika masalahnya di logika kita
-            return response()->json(['message' => 'Processed with error: ' . $e->getMessage()], 200);
+            return response()->json(['message' => 'Error processed'], 200);
         }
     }
 
@@ -244,7 +262,7 @@ class PaymentController extends Controller
         ]);
 
         // Create Payment Record
-        $payment = \App\Models\Payment::create([
+        $payment = Payment::create([
             'invoice_id'  => $invoice->id,
             'amount'      => $invoice->amount,
             'paid_at'     => now(),
