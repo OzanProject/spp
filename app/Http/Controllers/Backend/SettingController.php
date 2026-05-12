@@ -59,6 +59,13 @@ class SettingController extends Controller
             }
         }
 
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Pengaturan berhasil disimpan.'
+            ]);
+        }
+
         return back()->with('success', 'Pengaturan berhasil disimpan.');
     }
     public function testWa()

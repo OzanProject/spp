@@ -27,7 +27,7 @@
             </div>
         @endif
 
-        <form action="{{ route('admin.settings.update') }}" method="POST" enctype="multipart/form-data">
+        <form id="settings-form" action="{{ route('admin.settings.update') }}" method="POST" enctype="multipart/form-data">
             @csrf
             @method('PUT')
 
@@ -266,8 +266,8 @@
                     </div>
 
                     <div class="d-flex justify-content-end mt-2">
-                        <button type="submit" class="btn btn-primary px-5">
-                            <i class="bi bi-save me-1"></i> Simpan Semua Pengaturan
+                        <button type="submit" class="btn btn-primary px-5" id="btn-save-settings">
+                            <i class="bi bi-save me-1"></i> <span class="btn-text">Simpan Semua Pengaturan</span>
                         </button>
                     </div>
                 </div>
@@ -428,5 +428,57 @@ function testWAMessage() {
             status.className = 'mt-2 small text-danger';
         });
 }
+// AJAX Settings Update
+document.getElementById('settings-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const form = this;
+    const btn = document.getElementById('btn-save-settings');
+    const btnText = btn.querySelector('.btn-text');
+    const formData = new FormData(form);
+    
+    // UI state loading
+    btn.disabled = true;
+    const originalText = btnText.innerText;
+    btnText.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Menyimpan...';
+
+    fetch(form.action, {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            Toast.fire({
+                icon: 'success',
+                title: data.message || 'Pengaturan berhasil diperbarui.'
+            });
+            // Update UI components if colors changed (live update)
+            if (formData.has('primary_color')) {
+                document.documentElement.style.setProperty('--color-primary-custom', formData.get('primary_color'));
+                document.documentElement.style.setProperty('--bs-primary', formData.get('primary_color'));
+            }
+        } else {
+            Toast.fire({
+                icon: 'error',
+                title: data.message || 'Gagal menyimpan pengaturan.'
+            });
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        Toast.fire({
+            icon: 'error',
+            title: 'Terjadi kesalahan sistem.'
+        });
+    })
+    .finally(() => {
+        btn.disabled = false;
+        btnText.innerText = originalText;
+    });
+});
 </script>
 @endsection
