@@ -40,6 +40,7 @@ class PaymentController extends Controller
 
         try {
             $status = \Midtrans\Transaction::status($orderId);
+            \Illuminate\Support\Facades\Log::info('Midtrans Verification', (array) $status);
             
             // Parse Invoice ID
             $parts = explode('-', $orderId);
@@ -51,8 +52,12 @@ class PaymentController extends Controller
                 return response()->json(['status' => true]);
             }
 
-            return response()->json(['status' => false, 'message' => 'Status: ' . $status->transaction_status]);
+            return response()->json([
+                'status' => false, 
+                'message' => 'Status saat ini: ' . $status->transaction_status
+            ]);
         } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Midtrans Verify Error: ' . $e->getMessage());
             return response()->json(['status' => false, 'message' => $e->getMessage()]);
         }
     }
@@ -180,6 +185,8 @@ class PaymentController extends Controller
     }
     public function handleNotification(Request $request)
     {
+        \Illuminate\Support\Facades\Log::info('Midtrans Webhook Received', $request->all());
+        
         \Midtrans\Config::$serverKey = setting('midtrans_server_key');
         \Midtrans\Config::$isProduction = setting('midtrans_is_production') == '1';
 
@@ -214,6 +221,7 @@ class PaymentController extends Controller
 
             return response()->json(['status' => 'success']);
         } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Midtrans Webhook Error: ' . $e->getMessage());
             return response()->json(['message' => $e->getMessage()], 500);
         }
     }
